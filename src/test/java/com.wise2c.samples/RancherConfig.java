@@ -1,8 +1,5 @@
-## How To Use
+package com.wise2c.samples;
 
-Update endpint, accress key and secret key.
-
-```
 public class RancherConfig {
 
     public static final String ENDPOINT = "<YOUR ENDPOINT>";
@@ -10,4 +7,3 @@ public class RancherConfig {
     public static final String SECRET_KEY = "<SECRET_KEY>";
 
 }
-``` 

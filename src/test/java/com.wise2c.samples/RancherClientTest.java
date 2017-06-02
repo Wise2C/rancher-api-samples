@@ -11,14 +11,13 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.wise2c.samples.RancherConfig.*;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class RancherClientTest {
 
-    public static final String ENDPOINT = "<YOUR ENDPOINT>";
-    public static final String ACCESSKEY = "<ACCESS KEY>";
-    public static final String SECRET_KEY = "<SECRET_KEY>";
+
     private RancherClient rancherClient;
 
     @Before
