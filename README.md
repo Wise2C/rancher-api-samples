@@ -11,3 +11,10 @@ public class RancherConfig {
 
 }
 ``` 
+
+## How To Build
+
+```
+./gradlew build
+./gradlew test
+```
