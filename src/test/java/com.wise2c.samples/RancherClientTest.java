@@ -1,8 +1,6 @@
 package com.wise2c.samples;
 
-import com.wise2c.samples.entity.LaunchConfig;
-import com.wise2c.samples.entity.Service;
-import com.wise2c.samples.entity.Stack;
+import com.wise2c.samples.entity.*;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -26,7 +24,16 @@ public class RancherClientTest {
     }
 
     @Test
-    public void should_create_rancher_stack() throws IOException {
+    public void should_get_all_rancher_environments() throws IOException {
+        // when
+        Optional<Environments> environments = rancherClient.getEnvironments();
+        // then
+        assertThat(environments.isPresent(), is(true));
+        System.out.println("current environments: " + environments.get().getData());
+    }
+
+    @Test
+    public void should_create_rancher_stack_in_environment() throws IOException {
 
         // given
         String expectedName = "stack-" + UUID.randomUUID().toString();
@@ -34,14 +41,17 @@ public class RancherClientTest {
         Stack stack = new Stack();
         stack.setName(expectedName);
 
+        Environment target = getEnvironment();
+
         // when
-        Optional<Stack> newStack = rancherClient.createStack(stack);
+
+        Optional<Stack> newStack = rancherClient.createStack(stack, target.getId());
 
         assertThat(newStack.isPresent(), is(true));
         assertThat(newStack.get().getName(), is(expectedName));
 
         // after
-        rancherClient.deleteStack(newStack.get().getId());
+        rancherClient.deleteStack(newStack.get().getId(), target.getId());
 
     }
 
@@ -61,21 +71,32 @@ public class RancherClientTest {
 
         service.setLaunchConfig(launchConfig);
 
+        Environment target = getEnvironment();
+
         // when
         Stack stack = new Stack();
         stack.setName(expectedStackName);
 
         // then
-        Optional<Stack> newStack = rancherClient.createStack(stack);
+
+        Optional<Stack> newStack = rancherClient.createStack(stack, target.getId());
         assertThat(newStack.isPresent(), is(true));
 
-        Optional<Service> newService = rancherClient.createService(service, newStack.get().getId());
+        Optional<Service> newService = rancherClient.createService(service, target.getId(), newStack.get().getId());
 
         assertThat(newService.isPresent(), is(true));
 
         // teardown
-        rancherClient.deleteStack(newStack.get().getId());
+        rancherClient.deleteStack(newStack.get().getId(), target.getId());
 
+    }
+
+    private Environment getEnvironment() throws IOException {
+        Optional<Environments> environments = rancherClient.getEnvironments();
+        assertThat(environments.isPresent(), is(true));
+        Optional<Environment> environment = environments.get().getData().stream().findAny();
+        assertThat(environment.isPresent(), is(true));
+        return environment.get();
     }
 
 }

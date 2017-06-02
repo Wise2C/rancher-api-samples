@@ -1,6 +1,6 @@
 ## How To Use
 
-Update endpint, accress key and secret key.
+在Rancher"API-KEYS"下创建Account API Keys(账号API KEY),修改RancherConfig类中的信息为对应的KEY信息
 
 ```
 public class RancherConfig {
@@ -13,6 +13,8 @@ public class RancherConfig {
 ``` 
 
 ## How To Build
+
+该示例使用了Gradle进行构建,直接使用./gradlew build会自动下载Gradle本身以及相关依赖
 
 ```
 ./gradlew build

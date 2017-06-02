@@ -4,8 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.wise2c.samples.entity.Service;
-import com.wise2c.samples.entity.Stack;
+import com.wise2c.samples.entity.*;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.HttpClient;
@@ -39,22 +38,37 @@ public class RancherClient {
     }
 
     /**
-     * 创建Stack实例
+     * 获取当前Rancher实例下的所有Environment信息
+     * 注意:Rancher API中Project对象对应的就是Environment
+     * http://rancher-server/v2-beta/projects
      */
-    public Optional<Stack> createStack(Stack stack) throws IOException {
-        return Optional.ofNullable(post(String.format("%s/stack", this.endpoint), stack, Stack.class));
+    public Optional<Environments> getEnvironments() throws IOException {
+        return Optional.ofNullable(get(endpoint + "/projects", Environments.class));
+    }
+
+    /**
+     * 创建Stack实例
+     * * http://rancher-server/v2-beta/projects/${project_id}/stack
+     */
+    public Optional<Stack> createStack(Stack stack, String environmentId) throws IOException {
+        return Optional.ofNullable(post(String.format("%s/projects/%s/stack", this.endpoint, environmentId), stack, Stack.class));
     }
 
     /**
      * 在Stack下创建Service
+     * * * http://rancher-server/v2-beta/projects/${project_id}/service
      */
-    public Optional<Service> createService(Service service, String stackId) throws IOException {
+    public Optional<Service> createService(Service service, String environmentId, String stackId) throws IOException {
         service.setStackId(stackId);
-        return Optional.ofNullable(post(String.format("%s/service", this.endpoint), service, Service.class));
+        return Optional.ofNullable(post(String.format("%s/projects/%s/service", this.endpoint, environmentId), service, Service.class));
     }
 
-    public void deleteStack(String id) throws IOException {
-        delete(String.format("%s/stacks/%s", this.endpoint, id), Stack.class);
+    /**
+     * 在Environment下删除应用堆栈
+     * * * http://rancher-server/v2-beta/projects/${project_id}/service
+     */
+    public void deleteStack(String id, String environmentID) throws IOException {
+        delete(String.format("%s/projects/%s/stacks/%s", this.endpoint, environmentID, id), Stack.class);
     }
 
     private <T> T get(String url, Class<T> responseClass) throws IOException {
