@@ -24,12 +24,24 @@ public class RancherClientTest {
     }
 
     @Test
-    public void should_get_all_rancher_environments() throws IOException {
+    public void should_get_all_environments() throws IOException {
         // when
         Optional<Environments> environments = rancherClient.getEnvironments();
         // then
         assertThat(environments.isPresent(), is(true));
         System.out.println("current environments: " + environments.get().getData());
+    }
+
+    @Test
+    public void should_get_all_hosts() throws IOException {
+
+        // when
+        Optional<Hosts> hosts = rancherClient.getHosts();
+
+        // then
+        assertThat(hosts.isPresent(), is(true));
+        System.out.println(hosts.get());
+
     }
 
     @Test

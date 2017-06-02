@@ -47,8 +47,17 @@ public class RancherClient {
     }
 
     /**
+     * 获取当前Rancher实例下的所有Host信息
+     * 注意:Rancher API中Project对象对应的就是Environment
+     * http://rancher-server/v2-beta/hosts
+     */
+    public Optional<Hosts> getHosts() throws IOException {
+        return Optional.ofNullable(get(endpoint + "/hosts", Hosts.class));
+    }
+
+    /**
      * 创建Stack实例
-     * * http://rancher-server/v2-beta/projects/${project_id}/stack
+     * http://rancher-server/v2-beta/projects/${project_id}/stack
      */
     public Optional<Stack> createStack(Stack stack, String environmentId) throws IOException {
         return Optional.ofNullable(post(String.format("%s/projects/%s/stack", this.endpoint, environmentId), stack, Stack.class));
@@ -56,7 +65,7 @@ public class RancherClient {
 
     /**
      * 在Stack下创建Service
-     * * * http://rancher-server/v2-beta/projects/${project_id}/service
+     * http://rancher-server/v2-beta/projects/${project_id}/service
      */
     public Optional<Service> createService(Service service, String environmentId, String stackId) throws IOException {
         service.setStackId(stackId);
@@ -65,7 +74,7 @@ public class RancherClient {
 
     /**
      * 在Environment下删除应用堆栈
-     * * * http://rancher-server/v2-beta/projects/${project_id}/service
+     * http://rancher-server/v2-beta/projects/${project_id}/service
      */
     public void deleteStack(String id, String environmentID) throws IOException {
         delete(String.format("%s/projects/%s/stacks/%s", this.endpoint, environmentID, id), Stack.class);
