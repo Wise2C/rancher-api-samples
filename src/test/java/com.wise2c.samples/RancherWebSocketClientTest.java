@@ -19,6 +19,13 @@ public class RancherWebSocketClientTest {
     @Test
     public void should_connection_rancher_with_web_socket() throws URISyntaxException, IOException, InterruptedException {
 
+        RancherWebSocketClient c = new RancherWebSocketClient(ENDPOINT, ACCESSKEY, SECRET_KEY);
+        c.connection(getEnvironment());
+        Thread.sleep(10000);
+
+    }
+
+    private Environment getEnvironment() throws IOException {
         RancherClient rancherClient = new RancherClient(ENDPOINT, ACCESSKEY, SECRET_KEY);
         Optional<Environments> environments = rancherClient.getEnvironments();
         assertThat(environments.isPresent(), is(true));
@@ -26,12 +33,7 @@ public class RancherWebSocketClientTest {
         Optional<Environment> environment = environments.get().getData().stream().findAny();
 
         assertThat(environment.isPresent(), is(true));
-
-        RancherWebSocketClient c = new RancherWebSocketClient(ENDPOINT, ACCESSKEY, SECRET_KEY);
-        c.connection(environment.get());
-
-        Thread.sleep(10000);
-
+        return environment.get();
     }
 
 }
