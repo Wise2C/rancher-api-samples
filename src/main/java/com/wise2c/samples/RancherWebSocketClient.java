@@ -28,7 +28,7 @@ public class RancherWebSocketClient implements MessageHandler {
     }
 
     /**
-     * ws://182.140.210.214:8080/v2-beta/projects/1a5558/subscribe?eventNames=resource.change
+     * ws://rancher-server/v2-beta/projects/1a5558/subscribe?eventNames=resource.change
      * */
     public void connection(Environment environment) throws URISyntaxException {
 
