@@ -56,4 +56,13 @@ public class Service extends Resource {
     public void setStartOnCreate(boolean startOnCreate) {
         this.startOnCreate = startOnCreate;
     }
+
+    @Override
+    public String toString() {
+        return "Service{" +
+                "id='" + getId() + '\'' +
+                "name='" + getName() + '\'' +
+                "stackId='" + stackId + '\'' +
+                '}';
+    }
 }

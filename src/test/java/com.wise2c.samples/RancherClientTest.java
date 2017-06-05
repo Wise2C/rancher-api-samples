@@ -54,6 +54,23 @@ public class RancherClientTest {
     }
 
     @Test
+    public void should_get_services_from_stack() throws IOException {
+
+        // given
+        Optional<Stacks> stacks = rancherClient.getStacks();
+        assertThat(stacks.isPresent(), is(true));
+        assertThat(stacks.get().getData().size() > 0, is(true));
+
+        // when
+        Optional<Services> services = rancherClient.getServices(stacks.get().getData().stream().findAny().get().getId());
+
+        // then
+        assertThat(services.isPresent(), is(true));
+        assertThat(services.get().getData().size() > 0, is(true));
+        System.out.println(services.get().getData());
+    }
+
+    @Test
     public void should_create_rancher_stack_in_environment() throws IOException {
 
         // given
