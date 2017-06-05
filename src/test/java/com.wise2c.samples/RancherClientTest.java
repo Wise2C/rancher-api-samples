@@ -45,6 +45,15 @@ public class RancherClientTest {
     }
 
     @Test
+    public void should_get_all_stacks() throws IOException {
+
+        Optional<Stacks> stacks = rancherClient.getStacks();
+        assertThat(stacks.isPresent(), is(true));
+        System.out.println(stacks.get().getData());
+
+    }
+
+    @Test
     public void should_create_rancher_stack_in_environment() throws IOException {
 
         // given

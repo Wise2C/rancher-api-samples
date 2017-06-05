@@ -47,6 +47,15 @@ public class RancherClient {
     }
 
     /**
+     * 获取当前Rancher实例下的所有Environment信息
+     * 注意:Rancher API中Project对象对应的就是Environment
+     * http://rancher-server/v2-beta/stacks
+     */
+    public Optional<Stacks> getStacks() throws IOException {
+        return Optional.ofNullable(get(endpoint + "/stacks", Stacks.class));
+    }
+
+    /**
      * 获取当前Rancher实例下的所有Host信息
      * 注意:Rancher API中Project对象对应的就是Environment
      * http://rancher-server/v2-beta/hosts
