@@ -136,8 +136,32 @@ public class RancherClientTest {
         Optional<Instances> instances = rancherClient.getContainerInstances(serviceId);
 
         assertThat(instances.isPresent(), is(true));
-        assertThat(instances.get().getData().size()>0, is(true));
+        assertThat(instances.get().getData().size() > 0, is(true));
         System.out.println(instances.get().getData());
+
+    }
+
+    @Test
+    public void should_get_container_instance() throws IOException {
+
+        // given
+        Optional<Services> services = rancherClient.getServices();
+        assertThat(services.isPresent(), is(true));
+        assertThat(services.get().getData().size() > 0, is(true));
+
+        Optional<Instances> instances = rancherClient.getContainerInstances(services.get().getData().stream().findAny().get().getId());
+
+        assertThat(instances.isPresent(), is(true));
+        assertThat(instances.get().getData().size() > 0, is(true));
+        System.out.println(instances.get().getData());
+
+        // when
+        String containerId = instances.get().getData().stream().findAny().get().getId();
+        Optional<Instance> instance = rancherClient.getContainerInstance(containerId);
+
+        // then
+        assertThat(instance.isPresent(), is(true));
+        System.out.println(instance.get());
 
     }
 
