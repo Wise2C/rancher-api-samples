@@ -56,11 +56,44 @@ public class RancherClient {
     }
 
     /**
+     * 获取Rancher实例下Stack详情
+     * 注意:Rancher API中Project对象对应的就是Environment
+     * http://rancher-server/v2-beta/stacks/${stackId}
+     */
+    public Optional<Stack> getStack(String stackId) throws IOException {
+        return Optional.ofNullable(get(endpoint + "/stacks/" + stackId, Stack.class));
+    }
+
+    /**
+     * 获取当前Rancher的所有Service信息
+     * http://rancher-server/v2-beta/services
+     */
+    public Optional<Services> getServices() throws IOException {
+        return Optional.ofNullable(get(endpoint + "/services", Services.class));
+    }
+
+    /**
      * 获取当前Rancher实例Stack下的所有Service信息
      * http://rancher-server/v2-beta/stacks/${stackId}/services
      */
     public Optional<Services> getServices(String stackId) throws IOException {
         return Optional.ofNullable(get(endpoint + "/stacks/" + stackId + "/services", Services.class));
+    }
+
+    /**
+     * 获取Rancher实例下Service详情
+     * http://rancher-server/v2-beta/services/${serviceId}
+     */
+    public Optional<Service> getService(String serviceId) throws IOException {
+        return Optional.ofNullable(get(endpoint + "/services/" + serviceId, Service.class));
+    }
+
+    /**
+     * 获取Rancher实例下Service下的容器实例信息
+     * * http://rancher-server/v2-beta/services/${serviceId}/instances
+     */
+    public Optional<Instances> getContainerInstances(String serviceId) throws IOException {
+        return Optional.ofNullable(get(endpoint + "/services/" + serviceId + "/instances", Instances.class));
     }
 
     /**
