@@ -132,7 +132,7 @@ public class RancherClient {
     }
 
     /**
-     * 在Stack下更新Service
+     * 在Stack下升级Service
      * http://rancher-server/v2-beta/projects/${project_id}/services/${service_id}/?action=upgrade
      *
      * @param environmentId
