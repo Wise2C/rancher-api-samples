@@ -13,7 +13,7 @@ import static com.wise2c.samples.RancherConfig.*;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class RancherClientTest {
+public class RancherClientTest extends TestBase {
 
 
     private RancherClient rancherClient;
@@ -178,6 +178,33 @@ public class RancherClientTest {
 
         // when
 
+        Optional<Stack> newStack = rancherClient.createStack(stack, target.getId());
+
+        assertThat(newStack.isPresent(), is(true));
+        assertThat(newStack.get().getName(), is(expectedName));
+
+        // after
+        rancherClient.deleteStack(newStack.get().getId(), target.getId());
+
+    }
+
+    @Test
+    public void should_create_rancher_stack_with_compose_file() throws Exception {
+
+        String dockerCompose = getFile("docker-compose.yml");
+        String rancherCompose = getFile("rancher-compose.yml");
+
+        // given
+        String expectedName = "stack-" + UUID.randomUUID().toString();
+
+        Stack stack = new Stack();
+        stack.setName(expectedName);
+        stack.setDockerCompose(dockerCompose);
+        stack.setRancherCompose(rancherCompose);
+
+        Environment target = getEnvironment();
+
+        // when
         Optional<Stack> newStack = rancherClient.createStack(stack, target.getId());
 
         assertThat(newStack.isPresent(), is(true));
