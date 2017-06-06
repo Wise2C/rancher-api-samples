@@ -1,6 +1,7 @@
 package com.wise2c.samples;
 
 import com.wise2c.samples.action.InServiceStrategy;
+import com.wise2c.samples.action.ServiceRestart;
 import com.wise2c.samples.action.ServiceUpgrade;
 import com.wise2c.samples.entity.*;
 import org.junit.Before;
@@ -177,17 +178,16 @@ public class RancherClientTest extends TestBase {
         Stack stack = new Stack();
         stack.setName(expectedName);
 
-        Environment target = getEnvironment();
+        Environment environment = getEnvironment();
 
         // when
-
-        Optional<Stack> newStack = rancherClient.createStack(stack, target.getId());
+        Optional<Stack> newStack = rancherClient.createStack(stack, environment.getId());
 
         assertThat(newStack.isPresent(), is(true));
         assertThat(newStack.get().getName(), is(expectedName));
 
         // after
-        rancherClient.deleteStack(newStack.get().getId(), target.getId());
+        rancherClient.deleteStack(newStack.get().getId(), environment.getId());
 
     }
 
@@ -207,24 +207,105 @@ public class RancherClientTest extends TestBase {
 
         service.setLaunchConfig(launchConfig);
 
-        Environment target = getEnvironment();
+        Environment environment = getEnvironment();
 
         // when
         Stack stack = new Stack();
         stack.setName(expectedStackName);
 
         // then
-        Optional<Stack> newStack = rancherClient.createStack(stack, target.getId());
+        Optional<Stack> newStack = rancherClient.createStack(stack, environment.getId());
         assertThat(newStack.isPresent(), is(true));
 
-        Optional<Service> newService = rancherClient.createService(service, target.getId(), newStack.get().getId());
+        Optional<Service> newService = rancherClient.createService(service, environment.getId(), newStack.get().getId());
 
         assertThat(newService.isPresent(), is(true));
 
         // teardown
-        rancherClient.deleteStack(newStack.get().getId(), target.getId());
+        rancherClient.deleteStack(newStack.get().getId(), environment.getId());
 
     }
+
+    @Test
+    public void should_manage_service_lifecycle() throws Exception {
+
+        // given
+        String expectedStackName = "stack-" + UUID.randomUUID().toString();
+
+        Service service = new Service();
+        service.setScale(1);
+        service.setName("busybox");
+
+        LaunchConfig launchConfig = new LaunchConfig();
+        launchConfig.setImageUuid("docker:busybox");
+        launchConfig.setPorts(Arrays.asList("1234:1234", "4321:4321"));
+
+        service.setLaunchConfig(launchConfig);
+
+        Environment environment = getEnvironment();
+        Stack stack = new Stack();
+        stack.setName(expectedStackName);
+        Optional<Stack> newStack = rancherClient.createStack(stack, environment.getId());
+        assertThat(newStack.isPresent(), is(true));
+
+        Optional<Service> newService = rancherClient.createService(service, environment.getId(), newStack.get().getId());
+        assertThat(newService.isPresent(), is(true));
+
+        waitUntilServiceStateIs(newService.get().getId(), "active");
+
+        // when
+        rancherClient.deactivateService(environment.getId(), newService.get().getId());
+        waitUntilServiceStateIs(newService.get().getId(), "inactive");
+
+        rancherClient.activateService(environment.getId(), newService.get().getId());
+        waitUntilServiceStateIs(newService.get().getId(), "active");
+
+        rancherClient.restartService(environment.getId(), newService.get().getId(), new ServiceRestart());
+        waitUntilServiceStateIs(newService.get().getId(), "active");
+
+        // then
+        rancherClient.deleteStack(newStack.get().getId(), environment.getId());
+
+    }
+
+    @Test
+    public void should_delete_service_instance() throws Exception {
+
+        // given
+        String expectedStackName = "stack-" + UUID.randomUUID().toString();
+
+        Service service = new Service();
+        service.setScale(1);
+        service.setName("busybox");
+
+        LaunchConfig launchConfig = new LaunchConfig();
+        launchConfig.setImageUuid("docker:busybox");
+        launchConfig.setPorts(Arrays.asList("1234:1234", "4321:4321"));
+
+        service.setLaunchConfig(launchConfig);
+
+        Environment environment = getEnvironment();
+
+        Stack stack = new Stack();
+        stack.setName(expectedStackName);
+        Optional<Stack> newStack = rancherClient.createStack(stack, environment.getId());
+        assertThat(newStack.isPresent(), is(true));
+
+        Optional<Service> newService = rancherClient.createService(service, environment.getId(), newStack.get().getId());
+        waitUntilServiceStateIs(newService.get().getId(), "active");
+        assertThat(newService.isPresent(), is(true));
+
+        // when
+        rancherClient.deleteService(environment.getId(), newService.get().getId());
+
+        waitUntilServiceStateIs(newService.get().getId(), "removed");
+        // then
+
+        // teardown
+        rancherClient.deleteStack(newStack.get().getId(), environment.getId());
+
+    }
+
 
     @Test
     public void should_update_service_in_stack() throws Exception {
@@ -263,7 +344,7 @@ public class RancherClientTest extends TestBase {
         Optional<Service> upgradedService = rancherClient.upgradeService(target.getId(), newService.get().getId(), serviceUpgrade);
         waitUntilServiceStateIs(newService.get().getId(), "upgraded");
 
-        rancherClient.finishUpgrade(target.getId(), newService.get().getId());
+        rancherClient.finishUpgradeService(target.getId(), newService.get().getId());
         waitUntilServiceStateIs(newService.get().getId(), "active");
 
         // then

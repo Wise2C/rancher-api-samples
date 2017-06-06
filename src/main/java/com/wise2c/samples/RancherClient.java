@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.wise2c.samples.action.ServiceRestart;
 import com.wise2c.samples.action.ServiceUpgrade;
 import com.wise2c.samples.entity.*;
 import org.apache.commons.codec.binary.Base64;
@@ -144,19 +145,72 @@ public class RancherClient {
     }
 
     /***
+     * 在Stack下Service升级回滚
+     * http://rancher-server/v2-beta/projects/${project_id}/services/${service_id}/?action=rollback
+     *
+     * @param environmentId
+     * @param serviceId
+     */
+    public Optional<Service> rollbackService(String environmentId, String serviceId) throws IOException {
+        return Optional.ofNullable(post(String.format("%s/projects/%s/services/%s/?action=rollback", endpoint, environmentId, serviceId), Service.class));
+    }
+
+    /***
      * 在Stack下Service确认升级完成
      * http://rancher-server/v2-beta/projects/${project_id}/services/${service_id}/?action=finishupgrade
      *
      * @param environmentId
      * @param serviceId
      */
-    public Optional<Service> finishUpgrade(String environmentId, String serviceId) throws IOException {
+    public Optional<Service> finishUpgradeService(String environmentId, String serviceId) throws IOException {
         return Optional.ofNullable(post(String.format("%s/projects/%s/services/%s/?action=finishupgrade", endpoint, environmentId, serviceId), Service.class));
+    }
+
+    /***
+     * 在Stack下Service重启
+     * http://rancher-server/v2-beta/projects/${project_id}/services/${service_id}/?action=restart
+     *
+     * @param environmentId
+     * @param serviceId
+     * @param serviceRestart
+     */
+    public Optional<Service> restartService(String environmentId, String serviceId, ServiceRestart serviceRestart) throws IOException {
+        return Optional.ofNullable(post(String.format("%s/projects/%s/services/%s/?action=restart", endpoint, environmentId, serviceId, serviceRestart), Service.class));
+    }
+
+    /***
+     * 在Stack下Service停止
+     * http://rancher-server/v2-beta/projects/${project_id}/services/${service_id}/?action=deactivate
+     *
+     * @param environmentId
+     * @param serviceId
+     */
+    public Optional<Service> deactivateService(String environmentId, String serviceId) throws IOException {
+        return Optional.ofNullable(post(String.format("%s/projects/%s/services/%s/?action=deactivate", endpoint, environmentId, serviceId), Service.class));
+    }
+
+    /***
+     * 在Stack下Service启动
+     * http://rancher-server/v2-beta/projects/${project_id}/services/${service_id}/?action=activate
+     *
+     * @param environmentId
+     * @param serviceId
+     */
+    public Optional<Service> activateService(String environmentId, String serviceId) throws IOException {
+        return Optional.ofNullable(post(String.format("%s/projects/%s/services/%s/?action=activate", endpoint, environmentId, serviceId), Service.class));
     }
 
     /**
      * 在Environment下删除应用堆栈
-     * http://rancher-server/v2-beta/projects/${project_id}/service
+     * http://rancher-server/v2-beta/projects/${project_id}/services/${serviceId}
+     */
+    public void deleteService(String environmentId, String serviceId) throws IOException {
+        delete(String.format("%s/projects/%s/services/%s", this.endpoint, environmentId, serviceId), Service.class);
+    }
+
+    /**
+     * 在Environment下删除应用堆栈
+     * http://rancher-server/v2-beta/projects/${project_id}/stacks/${stackId}
      */
     public void deleteStack(String id, String environmentID) throws IOException {
         delete(String.format("%s/projects/%s/stacks/%s", this.endpoint, environmentID, id), Stack.class);
