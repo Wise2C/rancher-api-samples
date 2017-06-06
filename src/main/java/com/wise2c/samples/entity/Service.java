@@ -13,8 +13,18 @@ public class Service extends Resource {
 
     private boolean startOnCreate = true;
 
+    private String state;
+
     public Service() {
         super("service");
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
     }
 
     public int getScale() {
@@ -56,6 +66,7 @@ public class Service extends Resource {
     public void setStartOnCreate(boolean startOnCreate) {
         this.startOnCreate = startOnCreate;
     }
+
 
     @Override
     public String toString() {

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.wise2c.samples.action.ServiceUpgrade;
 import com.wise2c.samples.entity.*;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
@@ -131,6 +132,29 @@ public class RancherClient {
     }
 
     /**
+     * 在Stack下更新Service
+     * http://rancher-server/v2-beta/projects/${project_id}/services/${service_id}/?action=upgrade
+     *
+     * @param environmentId
+     * @param serviceId
+     * @param serviceUpgrade
+     */
+    public Optional<Service> upgradeService(String environmentId, String serviceId, ServiceUpgrade serviceUpgrade) throws IOException {
+        return Optional.ofNullable(post(String.format("%s/projects/%s/services/%s/?action=upgrade", endpoint, environmentId, serviceId), serviceUpgrade, Service.class));
+    }
+
+    /***
+     * 在Stack下Service确认升级完成
+     * http://rancher-server/v2-beta/projects/${project_id}/services/${service_id}/?action=finishupgrade
+     *
+     * @param environmentId
+     * @param serviceId
+     */
+    public Optional<Service> finishUpgrade(String environmentId, String serviceId) throws IOException {
+        return Optional.ofNullable(post(String.format("%s/projects/%s/services/%s/?action=finishupgrade", endpoint, environmentId, serviceId), Service.class));
+    }
+
+    /**
      * 在Environment下删除应用堆栈
      * http://rancher-server/v2-beta/projects/${project_id}/service
      */
@@ -151,6 +175,11 @@ public class RancherClient {
     private <T> T post(String url, Object data, Class<T> responseClass) throws IOException {
         PostMethod method = new PostMethod(url);
         method.setRequestEntity(getRequestBody(data));
+        return this.execute(method, responseClass);
+    }
+
+    private <T> T post(String url, Class<T> responseClass) throws IOException {
+        PostMethod method = new PostMethod(url);
         return this.execute(method, responseClass);
     }
 

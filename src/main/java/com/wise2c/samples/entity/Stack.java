@@ -6,10 +6,6 @@ public class Stack extends Resource {
 
     private String state;
 
-    private String dockerCompose;
-
-    private String rancherCompose;
-
     private boolean startOnCreate;
 
     public Stack() {
@@ -30,22 +26,6 @@ public class Stack extends Resource {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getDockerCompose() {
-        return dockerCompose;
-    }
-
-    public void setDockerCompose(String dockerCompose) {
-        this.dockerCompose = dockerCompose;
-    }
-
-    public String getRancherCompose() {
-        return rancherCompose;
-    }
-
-    public void setRancherCompose(String rancherCompose) {
-        this.rancherCompose = rancherCompose;
     }
 
     public String getState() {

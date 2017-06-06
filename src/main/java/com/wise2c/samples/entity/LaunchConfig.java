@@ -10,6 +10,25 @@ public class LaunchConfig {
     private String kind;
     private List<String> ports;
     private String type;
+    private boolean stdinOpen = true;
+
+    private boolean tty = true;
+
+    public boolean isStdinOpen() {
+        return stdinOpen;
+    }
+
+    public void setStdinOpen(boolean stdinOpen) {
+        this.stdinOpen = stdinOpen;
+    }
+
+    public boolean isTty() {
+        return tty;
+    }
+
+    public void setTty(boolean tty) {
+        this.tty = tty;
+    }
 
     public String getType() {
         return type;

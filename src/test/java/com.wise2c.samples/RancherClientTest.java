@@ -1,11 +1,14 @@
 package com.wise2c.samples;
 
+import com.wise2c.samples.action.InServiceStrategy;
+import com.wise2c.samples.action.ServiceUpgrade;
 import com.wise2c.samples.entity.*;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -189,33 +192,6 @@ public class RancherClientTest extends TestBase {
     }
 
     @Test
-    public void should_create_rancher_stack_with_compose_file() throws Exception {
-
-        String dockerCompose = getFile("docker-compose.yml");
-        String rancherCompose = getFile("rancher-compose.yml");
-
-        // given
-        String expectedName = "stack-" + UUID.randomUUID().toString();
-
-        Stack stack = new Stack();
-        stack.setName(expectedName);
-        stack.setDockerCompose(dockerCompose);
-        stack.setRancherCompose(rancherCompose);
-
-        Environment target = getEnvironment();
-
-        // when
-        Optional<Stack> newStack = rancherClient.createStack(stack, target.getId());
-
-        assertThat(newStack.isPresent(), is(true));
-        assertThat(newStack.get().getName(), is(expectedName));
-
-        // after
-        rancherClient.deleteStack(newStack.get().getId(), target.getId());
-
-    }
-
-    @Test
     public void should_create_service_in_stack() throws IOException {
 
         // given
@@ -238,7 +214,6 @@ public class RancherClientTest extends TestBase {
         stack.setName(expectedStackName);
 
         // then
-
         Optional<Stack> newStack = rancherClient.createStack(stack, target.getId());
         assertThat(newStack.isPresent(), is(true));
 
@@ -248,6 +223,72 @@ public class RancherClientTest extends TestBase {
 
         // teardown
         rancherClient.deleteStack(newStack.get().getId(), target.getId());
+
+    }
+
+    @Test
+    public void should_update_service_in_stack() throws Exception {
+
+        // given
+        String expectedStackName = "stack-" + UUID.randomUUID().toString();
+
+        Service service = new Service();
+        service.setScale(1);
+        service.setName("busybox");
+
+        LaunchConfig launchConfig = new LaunchConfig();
+        launchConfig.setImageUuid("docker:busybox");
+        service.setLaunchConfig(launchConfig);
+
+        Environment target = getEnvironment();
+
+        Stack stack = new Stack();
+        stack.setName(expectedStackName);
+        Optional<Stack> newStack = rancherClient.createStack(stack, target.getId());
+        assertThat(newStack.isPresent(), is(true));
+        Optional<Service> newService = rancherClient.createService(service, target.getId(), newStack.get().getId());
+        assertThat(newService.isPresent(), is(true));
+
+        waitUntilServiceStateIs(newService.get().getId(), "active");
+
+        // when
+        ServiceUpgrade serviceUpgrade = new ServiceUpgrade();
+        InServiceStrategy inServiceStrategy = new InServiceStrategy();
+        inServiceStrategy.setLaunchConfig(newService.get().getLaunchConfig());
+        inServiceStrategy.getLaunchConfig().setImageUuid("docker:busybox:1.26.2-glibc");
+        inServiceStrategy.getLaunchConfig().setPorts(Collections.emptyList());
+
+        serviceUpgrade.setInServiceStrategy(inServiceStrategy);
+
+        Optional<Service> upgradedService = rancherClient.upgradeService(target.getId(), newService.get().getId(), serviceUpgrade);
+        waitUntilServiceStateIs(newService.get().getId(), "upgraded");
+
+        rancherClient.finishUpgrade(target.getId(), newService.get().getId());
+        waitUntilServiceStateIs(newService.get().getId(), "active");
+
+        // then
+        assertThat(upgradedService.isPresent(), is(true));
+        assertThat(upgradedService.get().getLaunchConfig().getImageUuid(), is("docker:busybox:1.26.2-glibc"));
+
+        // teardown
+        rancherClient.deleteStack(newStack.get().getId(), target.getId());
+
+    }
+
+    private void waitUntilServiceStateIs(String serviceId, String targetState) throws Exception {
+        int i = 30;
+        while (i-- > 0) {
+            Optional<Service> checkService = rancherClient.getService(serviceId);
+            String state = checkService.get().getState();
+            if (state.equals(targetState)) {
+                break;
+            }
+            System.out.println(state);
+            Thread.sleep(2000);
+        }
+        if (i <= 0) {
+            throw new Exception("Service[" + serviceId + "] State not invalidate[" + targetState + "], current state is " + rancherClient.getService(serviceId).get().getState());
+        }
 
     }
 
