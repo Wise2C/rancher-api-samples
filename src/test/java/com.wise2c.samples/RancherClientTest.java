@@ -5,6 +5,7 @@ import com.wise2c.samples.action.ServiceRestart;
 import com.wise2c.samples.action.ServiceUpgrade;
 import com.wise2c.samples.entity.*;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -45,6 +46,53 @@ public class RancherClientTest extends TestBase {
         // then
         assertThat(hosts.isPresent(), is(true));
         System.out.println(hosts.get());
+
+    }
+
+    @Test
+    public void should_get_host_instance() throws IOException {
+
+        // given
+        Optional<Hosts> hosts = rancherClient.getHosts();
+        assertThat(hosts.isPresent(), is(true));
+        assertThat(hosts.get().getData().size() > 0, is(true));
+
+        Optional<Host> host = hosts.get().getData().stream().findAny();
+        // when
+        Optional<Host> host2 = rancherClient.getHost(host.get().getId());
+
+        // then
+        assertThat(host.get().getId().equals(host2.get().getId()), is(true));
+
+    }
+
+    @Test
+    public void should_update_host_instance_info() throws IOException {
+
+        // given
+        Optional<Environments> environments = rancherClient.getEnvironments();
+        assertThat(environments.isPresent(), is(true));
+        assertThat(environments.get().getData().size() > 0, is(true));
+
+        Optional<Environment> targetEnvironment = environments.get().getData().stream().findFirst();
+        assertThat(targetEnvironment.isPresent(), is(true));
+
+        Optional<Hosts> hosts = rancherClient.getHosts(targetEnvironment.get().getId());
+        assertThat(hosts.isPresent(), is(true));
+        assertThat(hosts.get().getData().size() > 0, is(true));
+
+        Optional<Host> host = hosts.get().getData().stream().findAny();
+        assertThat(host.isPresent(), is(true));
+
+        Host currentHost = host.get();
+        currentHost.getLabels().put("label1", "value1");
+
+        // when
+        Optional<Host> update = rancherClient.updateHost(targetEnvironment.get().getId(), currentHost);
+
+        // then
+        assertThat(update.isPresent(), is(true));
+        assertThat(update.get().getLabels().containsKey("label1"), is(true));
 
     }
 
@@ -355,6 +403,7 @@ public class RancherClientTest extends TestBase {
         rancherClient.deleteStack(newStack.get().getId(), target.getId());
 
     }
+
 
     private void waitUntilServiceStateIs(String serviceId, String targetState) throws Exception {
         int i = 30;

@@ -2,8 +2,6 @@ package com.wise2c.samples.action;
 
 import com.wise2c.samples.entity.LaunchConfig;
 
-import java.util.List;
-
 public class InServiceStrategy {
 
     private int batchSize = 1;

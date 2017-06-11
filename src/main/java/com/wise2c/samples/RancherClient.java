@@ -12,10 +12,7 @@ import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.methods.DeleteMethod;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.StringRequestEntity;
+import org.apache.commons.httpclient.methods.*;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,6 +103,7 @@ public class RancherClient {
         return Optional.ofNullable(get(endpoint + "/containers/" + instanceId, Instance.class));
     }
 
+
     /**
      * 获取当前Rancher实例下的所有Host信息
      * 注意:Rancher API中Project对象对应的就是Environment
@@ -113,6 +111,30 @@ public class RancherClient {
      */
     public Optional<Hosts> getHosts() throws IOException {
         return Optional.ofNullable(get(endpoint + "/hosts", Hosts.class));
+    }
+
+    /**
+     * 获取当前Rancher实例下Environment所有Host信息
+     * 注意:Rancher API中Project对象对应的就是Environment
+     * http://rancher-server/v2-beta/projects/${environmentId}/hosts
+     */
+    public Optional<Hosts> getHosts(String environmentId) throws IOException {
+        return Optional.ofNullable(get(endpoint + "/projects/" + environmentId + "/hosts", Hosts.class));
+    }
+
+    /**
+     * 获取当前Rancher实例下Host主机信息
+     * http://rancher-server/v2-beta/hosts/${id}
+     */
+    public Optional<Host> getHost(String id) throws IOException {
+        return Optional.ofNullable(get(endpoint + "/hosts/" + id, Host.class));
+    }
+
+    /**
+     * 更新Rancher实例下Host主机信息
+     */
+    public Optional<Host> updateHost(String environmentId, Host host) throws IOException {
+        return Optional.ofNullable(put(endpoint + "/projects/" + environmentId + "/hosts/" + host.getId(), host, Host.class));
     }
 
     /**
@@ -234,6 +256,12 @@ public class RancherClient {
 
     private <T> T post(String url, Class<T> responseClass) throws IOException {
         PostMethod method = new PostMethod(url);
+        return this.execute(method, responseClass);
+    }
+
+    private <T> T put(String url, Object data, Class<T> responseClass) throws IOException {
+        PutMethod method = new PutMethod(url);
+        method.setRequestEntity(getRequestBody(data));
         return this.execute(method, responseClass);
     }
 
