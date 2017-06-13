@@ -1,6 +1,8 @@
 package com.wise2c.samples.websocket;
 
 import org.apache.tomcat.websocket.pojo.PojoEndpointClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.websocket.*;
 import java.io.IOException;
@@ -12,9 +14,14 @@ import java.util.*;
 @ClientEndpoint
 public class WebSocketClient implements WsLifecycleListener {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(WebSocketClient.class);
+    private final URI endpointURI;
     private Session userSession;
     private MessageHandler messageHandler;
     private Set<WsLifecycleListener> lifecycleListeners = new HashSet<>();
+    private final WebSocketContainer container;
+    private final ClientEndpointConfig endpointConfig;
+    private final Endpoint ep;
 
     /**
      * @param endpointURI:   websocket endpoint ws:// wws://
@@ -22,15 +29,14 @@ public class WebSocketClient implements WsLifecycleListener {
      */
     public WebSocketClient(URI endpointURI, Map<String, List<String>> customHeaders) {
         try {
-            WebSocketContainer container = ContainerProvider.getWebSocketContainer();
-            Endpoint ep = new PojoEndpointClient(this, Collections.emptyList());
+            this.container = ContainerProvider.getWebSocketContainer();
+            this.ep = new PojoEndpointClient(this, Collections.emptyList());
             ClientConfig clientConfig = new ClientConfig(customHeaders);
             ClientEndpointConfig.Builder builder = ClientEndpointConfig.Builder.create();
             builder.configurator(clientConfig);
-
-            ClientEndpointConfig endpointConfig = builder.build();
-
-            container.connectToServer(ep, endpointConfig, endpointURI);
+            this.endpointConfig = builder.build();
+            this.endpointURI = endpointURI;
+            container.connectToServer(ep, endpointConfig, this.endpointURI);
         } catch (Exception e) {
             throw new RuntimeException(endpointURI.toString(), e);
         }
@@ -47,15 +53,18 @@ public class WebSocketClient implements WsLifecycleListener {
     @OnClose
     public void onClose(Session userSession, CloseReason reason) {
         this.userSession = null;
+        LOGGER.info("websocket connection close");
         for (WsLifecycleListener listener : lifecycleListeners) {
             listener.onClose(userSession, reason);
         }
+        reConnection();
     }
+
 
     @Override
     @OnError
     public void onError(Throwable e) {
-        e.printStackTrace();
+        LOGGER.error("websocket connection error" + e.getMessage(), e);
         for (WsLifecycleListener listener : lifecycleListeners) {
             listener.onError(e);
         }
@@ -105,5 +114,13 @@ public class WebSocketClient implements WsLifecycleListener {
         return userSession;
     }
 
+    private void reConnection() {
+        try {
+            LOGGER.info("websocket re-connection close");
+            container.connectToServer(ep, endpointConfig, this.endpointURI);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+    }
 
 }

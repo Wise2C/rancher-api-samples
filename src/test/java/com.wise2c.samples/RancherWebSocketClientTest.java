@@ -21,7 +21,7 @@ public class RancherWebSocketClientTest {
 
         RancherWebSocketClient c = new RancherWebSocketClient(ENDPOINT, ACCESSKEY, SECRET_KEY);
         c.connection(getEnvironment());
-        Thread.sleep(10000);
+        Thread.sleep(1000000);
 
     }
 

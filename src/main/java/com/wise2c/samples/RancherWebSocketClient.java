@@ -4,6 +4,8 @@ import com.wise2c.samples.entity.Environment;
 import com.wise2c.samples.websocket.MessageHandler;
 import com.wise2c.samples.websocket.WebSocketClient;
 import org.apache.commons.codec.binary.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.websocket.Session;
 import java.net.URI;
@@ -15,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 
 public class RancherWebSocketClient implements MessageHandler {
+
+    private static Logger LOGGER = LoggerFactory.getLogger(RancherWebSocketClient.class);
 
     private final String endpoint;
     private final String accesskey;
@@ -29,7 +33,7 @@ public class RancherWebSocketClient implements MessageHandler {
 
     /**
      * ws://rancher-server/v2-beta/projects/1a5558/subscribe?eventNames=resource.change
-     * */
+     */
     public void connection(Environment environment) throws URISyntaxException {
 
         Map<String, List<String>> headers = new HashMap<>();
@@ -52,7 +56,7 @@ public class RancherWebSocketClient implements MessageHandler {
 
     @Override
     public void handleText(String message, Session session) {
-        System.out.println(message);
+        LOGGER.info(message);
     }
 
     @Override
