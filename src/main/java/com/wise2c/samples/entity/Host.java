@@ -13,8 +13,34 @@ public class Host extends Resource {
 
     private List<PublicEndpoint> publicEndpoints;
 
+    /**
+     * memory resource limit
+     */
+    private int memory;
+
+    /**
+     * cpu reousrce limit
+     */
+    private int milliCpu;
+
     public Host() {
         super("host");
+    }
+
+    public int getMemory() {
+        return memory;
+    }
+
+    public void setMemory(int memory) {
+        this.memory = memory;
+    }
+
+    public int getMilliCpu() {
+        return milliCpu;
+    }
+
+    public void setMilliCpu(int milliCpu) {
+        this.milliCpu = milliCpu;
     }
 
     public String getHostname() {
@@ -52,9 +78,12 @@ public class Host extends Resource {
     @Override
     public String toString() {
         return "Host{" +
-                "id='" + getId() + "'" +
                 "agentIpAddress='" + agentIpAddress + '\'' +
                 ", hostname='" + hostname + '\'' +
+                ", labels=" + labels +
+                ", publicEndpoints=" + publicEndpoints +
+                ", memory=" + memory +
+                ", milliCpu=" + milliCpu +
                 '}';
     }
 }
