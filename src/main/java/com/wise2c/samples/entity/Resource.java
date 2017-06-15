@@ -2,6 +2,8 @@ package com.wise2c.samples.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import java.util.Map;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Resource {
 
@@ -17,8 +19,36 @@ public class Resource {
 
     private String kind;
 
+    private Map<String, String> links;
+
+    private Map<String, String> actions;
+
     public Resource(String type) {
         this.type = type;
+    }
+
+    public Map<String, String> getLinks() {
+        return links;
+    }
+
+    public void setLinks(Map<String, String> links) {
+        this.links = links;
+    }
+
+    public Map<String, String> getActions() {
+        return actions;
+    }
+
+    public void setActions(Map<String, String> actions) {
+        this.actions = actions;
+    }
+
+    public String getKind() {
+        return kind;
+    }
+
+    public void setKind(String kind) {
+        this.kind = kind;
     }
 
     public String getId() {

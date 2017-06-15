@@ -27,7 +27,7 @@ public class RancherWebSocketClientTest {
 
     private Environment getEnvironment() throws IOException {
         RancherClient rancherClient = new RancherClient(ENDPOINT, ACCESSKEY, SECRET_KEY);
-        Optional<Environments> environments = rancherClient.getEnvironments();
+        Optional<Environments> environments = rancherClient.environments();
         assertThat(environments.isPresent(), is(true));
 
         Optional<Environment> environment = environments.get().getData().stream().findAny();

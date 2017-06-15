@@ -7,6 +7,8 @@ public class Host extends Resource {
 
     private String hostname;
 
+    private String state;
+
     private String agentIpAddress;
 
     private Map<String, String> labels;
@@ -16,30 +18,48 @@ public class Host extends Resource {
     /**
      * memory resource limit
      */
-    private int memory;
+    private long memory;
 
     /**
      * cpu reousrce limit
      */
-    private int milliCpu;
+    private long milliCpu;
+
+    private List<String> instanceIds;
 
     public Host() {
         super("host");
     }
 
-    public int getMemory() {
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public List<String> getInstanceIds() {
+        return instanceIds;
+    }
+
+    public void setInstanceIds(List<String> instanceIds) {
+        this.instanceIds = instanceIds;
+    }
+
+    public long getMemory() {
         return memory;
     }
 
-    public void setMemory(int memory) {
+    public void setMemory(long memory) {
         this.memory = memory;
     }
 
-    public int getMilliCpu() {
+    public long getMilliCpu() {
         return milliCpu;
     }
 
-    public void setMilliCpu(int milliCpu) {
+    public void setMilliCpu(long milliCpu) {
         this.milliCpu = milliCpu;
     }
 

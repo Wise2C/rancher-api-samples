@@ -3,6 +3,7 @@ package com.wise2c.samples.entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.List;
+import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CollectionResponse<T> {
@@ -10,6 +11,8 @@ public class CollectionResponse<T> {
     private String type;
     private String resourceType;
     private List<T> data;
+
+
 
     public String getType() {
         return type;
