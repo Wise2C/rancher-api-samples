@@ -43,6 +43,10 @@ public class RancherClient extends HttpClient {
         return Optional.ofNullable(get("/stacks", Stacks.class));
     }
 
+    public Optional<Stacks> stacks(String environmentId) throws IOException {
+        return Optional.ofNullable(get("/projects/" + environmentId + "/stacks", Stacks.class));
+    }
+
     /**
      * 获取Rancher实例下Stack详情
      * 注意:Rancher API中Project对象对应的就是Environment
@@ -66,6 +70,14 @@ public class RancherClient extends HttpClient {
      */
     public Optional<Services> services(String stackId) throws IOException {
         return Optional.ofNullable(get("/stacks/" + stackId + "/services", Services.class));
+    }
+
+    public Optional<LoadBalancerServices> loadBalancerServices() throws IOException {
+        return Optional.ofNullable(get("/loadbalancerservices", LoadBalancerServices.class));
+    }
+
+    public Optional<LoadBalancerService> createLoadBalancerServices(String environmentId, LoadBalancerService loadBalancerService) throws IOException {
+        return Optional.ofNullable(post(String.format("/projects/%s/loadbalancerservices", environmentId), loadBalancerService, LoadBalancerService.class));
     }
 
     /**

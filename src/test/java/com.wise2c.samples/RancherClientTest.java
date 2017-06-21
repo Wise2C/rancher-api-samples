@@ -28,6 +28,36 @@ public class RancherClientTest extends TestBase {
     }
 
     @Test
+    public void should_get_all_load_balances() throws IOException {
+        // when
+        Optional<LoadBalancerServices> loadBalancerServices = rancherClient.loadBalancerServices();
+        // then
+        assertThat(loadBalancerServices.isPresent(), is(true));
+        System.out.println("current loadbalances: " + loadBalancerServices.get().getData());
+    }
+
+    @Test
+    public void should_create_load_balance_service() throws IOException {
+
+        // given
+        Environment environment = getEnvironment();
+
+        Optional<Stacks> stacks = rancherClient.stacks(environment.getId());
+        assertThat(stacks.isPresent(), is(true));
+
+        Optional<Stack> stack = stacks.get().getData().stream().findAny();
+        assertThat(stack.isPresent(), is(true));
+
+        LoadBalancerService loadBalancerService = new LoadBalancerService();
+        loadBalancerService.setStackId(stack.get().getId());
+        loadBalancerService.setName("loadbalance-" + UUID.randomUUID().toString());
+
+        Optional<LoadBalancerService> loadBalancerServices = rancherClient.createLoadBalancerServices(environment.getId(), loadBalancerService);
+
+
+    }
+
+    @Test
     public void should_get_all_environment_instance() throws IOException {
         // when
         Optional<Environments> environments = rancherClient.environments();
@@ -467,7 +497,7 @@ public class RancherClientTest extends TestBase {
     private Environment getEnvironment() throws IOException {
         Optional<Environments> environments = rancherClient.environments();
         assertThat(environments.isPresent(), is(true));
-        Optional<Environment> environment = environments.get().getData().stream().findAny();
+        Optional<Environment> environment = environments.get().getData().stream().filter(environment1 -> environment1.getState().equals("active")).findAny();
         assertThat(environment.isPresent(), is(true));
         return environment.get();
     }

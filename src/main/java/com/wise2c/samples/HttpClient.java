@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.wise2c.samples.entity.LoadBalancerService;
+import com.wise2c.samples.entity.LoadBalancerServices;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.HttpMethod;
@@ -16,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.util.Optional;
 
 public abstract class HttpClient {
 
@@ -93,6 +96,7 @@ public abstract class HttpClient {
         objectMapper.configure(SerializationFeature.FAIL_ON_UNWRAPPED_TYPE_IDENTIFIERS, false);
         return objectMapper;
     }
+
 
 
 }
