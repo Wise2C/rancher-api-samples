@@ -51,8 +51,18 @@ public class RancherClientTest extends TestBase {
         LoadBalancerService loadBalancerService = new LoadBalancerService();
         loadBalancerService.setStackId(stack.get().getId());
         loadBalancerService.setName("loadbalance-" + UUID.randomUUID().toString());
+        LbConfig lbConfig = new LbConfig();
+        PortRule portRule = new PortRule();
+        portRule.setSourcePort(19291);
+        portRule.setTargetPort(19291);
+        portRule.setSelector("foo=bar");
+        portRule.setPriority(1);
+        portRule.setProtocol(Protocol.http);
+        lbConfig.setPortRules(Arrays.asList(portRule));
+        loadBalancerService.setLbConfig(lbConfig);
 
         Optional<LoadBalancerService> loadBalancerServices = rancherClient.createLoadBalancerServices(environment.getId(), loadBalancerService);
+        assertThat(loadBalancerServices.isPresent(), is(true));
 
 
     }
