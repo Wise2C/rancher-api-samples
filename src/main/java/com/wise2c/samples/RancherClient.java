@@ -76,8 +76,16 @@ public class RancherClient extends HttpClient {
         return Optional.ofNullable(get("/loadbalancerservices", LoadBalancerServices.class));
     }
 
+    public Optional<LoadBalancerService> loadBalancerService(String serviceId) throws IOException {
+        return Optional.ofNullable(get("/loadbalancerservices/" + serviceId, LoadBalancerService.class));
+    }
+
     public Optional<LoadBalancerService> createLoadBalancerServices(String environmentId, LoadBalancerService loadBalancerService) throws IOException {
         return Optional.ofNullable(post(String.format("/projects/%s/loadbalancerservices", environmentId), loadBalancerService, LoadBalancerService.class));
+    }
+
+    public Optional<LoadBalancerService> updateLoadBalancerService(String environmentId, String serviceId, LoadBalancerService loadBalancerService) throws IOException {
+        return Optional.ofNullable(put(String.format("/projects/%s/loadbalancerservices/%s", environmentId, serviceId), loadBalancerService, LoadBalancerService.class));
     }
 
     /**

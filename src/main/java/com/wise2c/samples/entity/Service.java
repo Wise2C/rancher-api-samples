@@ -15,6 +15,7 @@ public class Service extends Resource {
 
     private String state;
 
+
     public Service() {
         super("service");
     }
@@ -22,6 +23,7 @@ public class Service extends Resource {
     public Service(String type) {
         super(type);
     }
+
 
     public String getState() {
         return state;

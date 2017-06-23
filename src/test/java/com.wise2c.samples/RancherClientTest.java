@@ -4,14 +4,12 @@ import com.wise2c.samples.action.InServiceStrategy;
 import com.wise2c.samples.action.ServiceRestart;
 import com.wise2c.samples.action.ServiceUpgrade;
 import com.wise2c.samples.entity.*;
+import com.wise2c.samples.entity.Stack;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static com.wise2c.samples.RancherConfig.*;
 import static org.hamcrest.CoreMatchers.is;
@@ -37,7 +35,7 @@ public class RancherClientTest extends TestBase {
     }
 
     @Test
-    public void should_create_load_balance_service() throws IOException {
+    public void should_create_load_balance_service() throws Exception {
 
         // given
         Environment environment = getEnvironment();
@@ -45,12 +43,22 @@ public class RancherClientTest extends TestBase {
         Optional<Stacks> stacks = rancherClient.stacks(environment.getId());
         assertThat(stacks.isPresent(), is(true));
 
-        Optional<Stack> stack = stacks.get().getData().stream().findAny();
+        Optional<Stack> stack = stacks.get().getData().stream().filter(stack1 -> !stack1.getExternalId().contains("library:infra")).findAny();
         assertThat(stack.isPresent(), is(true));
 
         LoadBalancerService loadBalancerService = new LoadBalancerService();
         loadBalancerService.setStackId(stack.get().getId());
+        loadBalancerService.setScale(1);
         loadBalancerService.setName("loadbalance-" + UUID.randomUUID().toString());
+
+        LaunchConfig launchConfig = new LaunchConfig();
+        launchConfig.setImageUuid("docker:rancher/lb-service-haproxy:v0.6.4");
+        launchConfig.setPorts(Arrays.asList("19291:19291"));
+        HashMap<String, String> restartPolicy = new HashMap<>();
+        restartPolicy.put("name", "name");
+        launchConfig.setRestartPolicy(restartPolicy);
+        loadBalancerService.setLaunchConfig(launchConfig);
+
         LbConfig lbConfig = new LbConfig();
         PortRule portRule = new PortRule();
         portRule.setSourcePort(19291);
@@ -61,8 +69,13 @@ public class RancherClientTest extends TestBase {
         lbConfig.setPortRules(Arrays.asList(portRule));
         loadBalancerService.setLbConfig(lbConfig);
 
-        Optional<LoadBalancerService> loadBalancerServices = rancherClient.createLoadBalancerServices(environment.getId(), loadBalancerService);
-        assertThat(loadBalancerServices.isPresent(), is(true));
+        Optional<LoadBalancerService> service = rancherClient.createLoadBalancerServices(environment.getId(), loadBalancerService);
+        assertThat(service.isPresent(), is(true));
+
+        waitUntilLoadBalanceServiceStateIs(service.get().getId(), "active");
+
+        Optional<LoadBalancerService> upgradeService = rancherClient.updateLoadBalancerService(environment.getId(), service.get().getId(), loadBalancerService);
+        assertThat(upgradeService.isPresent(), is(true));
 
 
     }
@@ -483,6 +496,24 @@ public class RancherClientTest extends TestBase {
         }
         if (i <= 0) {
             throw new Exception("Host[" + hostId + "] State not invalidate[" + targetState + "], current state is " + rancherClient.service(hostId).get().getState());
+        }
+
+    }
+
+
+    private void waitUntilLoadBalanceServiceStateIs(String serviceId, String targetState) throws Exception {
+        int i = 30;
+        while (i-- > 0) {
+            Optional<LoadBalancerService> checkService = rancherClient.loadBalancerService(serviceId);
+            String state = checkService.get().getState();
+            if (state.equals(targetState)) {
+                break;
+            }
+            System.out.println(state);
+            Thread.sleep(2000);
+        }
+        if (i <= 0) {
+            throw new Exception("Service[" + serviceId + "] State not invalidate[" + targetState + "], current state is " + rancherClient.service(serviceId).get().getState());
         }
 
     }

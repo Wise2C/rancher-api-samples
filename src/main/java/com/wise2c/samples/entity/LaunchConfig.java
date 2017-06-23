@@ -3,6 +3,7 @@ package com.wise2c.samples.entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.List;
+import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class LaunchConfig {
@@ -11,6 +12,7 @@ public class LaunchConfig {
     private List<String> ports;
     private String type;
     private boolean stdinOpen = true;
+    private Map<String, String> restartPolicy;
 
     private boolean tty = true;
 
@@ -60,5 +62,13 @@ public class LaunchConfig {
 
     public void setPorts(List<String> ports) {
         this.ports = ports;
+    }
+
+    public Map<String, String> getRestartPolicy() {
+        return restartPolicy;
+    }
+
+    public void setRestartPolicy(Map<String, String> restartPolicy) {
+        this.restartPolicy = restartPolicy;
     }
 }

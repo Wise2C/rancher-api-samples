@@ -6,10 +6,20 @@ public class Stack extends Resource {
 
     private String state;
 
+    private String externalId;
+
     private boolean startOnCreate;
 
     public Stack() {
         super("stack");
+    }
+
+    public String getExternalId() {
+        return externalId;
+    }
+
+    public void setExternalId(String externalId) {
+        this.externalId = externalId;
     }
 
     public boolean isStartOnCreate() {
