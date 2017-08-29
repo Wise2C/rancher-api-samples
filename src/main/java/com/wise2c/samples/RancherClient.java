@@ -227,7 +227,7 @@ public class RancherClient extends HttpClient {
      * @param serviceRestart
      */
     public Optional<Service> restartService(String environmentId, String serviceId, ServiceRestart serviceRestart) throws IOException {
-        return Optional.ofNullable(post(String.format("/projects/%s/services/%s/?action=restart", environmentId, serviceId, serviceRestart), Service.class));
+        return Optional.ofNullable(post(String.format("/projects/%s/services/%s/?action=restart", environmentId, serviceId), serviceRestart, Service.class));
     }
 
     /***
